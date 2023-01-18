@@ -7,5 +7,5 @@ namespace GameAuth.Api.Services.Interface;
 public interface IJwtService
 {
     public TokenResponse? CreateJwtSet(Account account);
-    public Task<TokenResponse?> RefreshAccess(ClaimsIdentity claimsIdentity);
+    public Task<TokenResponse?> RefreshAccess(ClaimsIdentity claimsIdentity, string rawRefreshToken);
 }

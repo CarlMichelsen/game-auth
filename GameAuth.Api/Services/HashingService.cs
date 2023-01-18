@@ -13,29 +13,25 @@ public class HashingService : IHashingService
     public string HashPassword(string password, out byte[] salt)
     {
         salt = RandomNumberGenerator.GetBytes(keySize);
+        var hash = ByteHashToCompare(password, salt);
+        return Convert.ToHexString(hash);
+    }
 
-        var hash = Rfc2898DeriveBytes.Pbkdf2(
+    public bool VerifyPassword(string password, string hash, byte[] salt)
+    {
+        var hashToCompare = ByteHashToCompare(password, salt);
+        var hashAsByteArr = Convert.FromHexString(hash);
+        return hashToCompare.SequenceEqual(hashAsByteArr);
+    }
+
+    private byte[] ByteHashToCompare(string password, byte[] salt)
+    {
+        return Rfc2898DeriveBytes.Pbkdf2(
             Encoding.UTF8.GetBytes(password),
             salt,
             iterations,
             hashAlgorithm,
             keySize
         );
-
-        return Convert.ToHexString(hash);
-    }
-
-    public bool VerifyPassword(string password, string hash, byte[] salt)
-    {
-        var hashToCompare = Rfc2898DeriveBytes.Pbkdf2(
-            password,
-            salt,
-            iterations,
-            hashAlgorithm,
-            keySize
-        );
-        var hashAsByteArr = Convert.FromHexString(hash);
-
-        return hashToCompare.SequenceEqual(hashAsByteArr);
     }
 }

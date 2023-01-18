@@ -1,5 +1,6 @@
 using GameAuth.Api.Models.Dto;
 using GameAuth.Api.Services.Interface;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -26,7 +27,10 @@ public class RefreshController : ControllerBase
         try
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
-            var res = await refreshService.Refresh(identity);
+            var refreshToken = await HttpContext.GetTokenAsync("access_token")
+                ?? throw new NullReferenceException("Token should exsist when identity exsists");
+
+            var res = await refreshService.Refresh(identity, refreshToken);
             var accountId = identity?.Claims.FirstOrDefault(a => a.Type.Equals("AccountId"))?.Value ?? "<No AccountId>";
             if (res.Ok)
             {

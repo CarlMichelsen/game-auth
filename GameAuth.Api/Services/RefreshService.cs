@@ -7,11 +7,32 @@ namespace GameAuth.Api.Services;
 
 public class RefreshService : IRefreshService
 {
-    public Task<AuthResponse<TokenResponse>> Refresh(ClaimsIdentity? claimsIdentity)
+    private readonly IJwtService jwtService;
+    private readonly IAccessControlService accessControlService;
+
+    public RefreshService(IJwtService jwtService, IAccessControlService accessControlService)
     {
-        var accountId = claimsIdentity?.Claims.FirstOrDefault(a => a.Type.Equals("AccountId"))?.Value ?? "<No AccountId>";
-        var str = $"accountId <{accountId}> attempted to refresh their token";
-        Console.WriteLine(str);
-        throw new NotImplementedException(str);
+        this.jwtService = jwtService;
+        this.accessControlService = accessControlService;
+    }
+
+    public async Task<AuthResponse<TokenResponse>> Refresh(ClaimsIdentity? claimsIdentity, string rawRefreshToken)
+    {
+        var res = new AuthResponse<TokenResponse>();
+        if (claimsIdentity is null)
+        {
+            res.Errors.Add("invalid token");
+            return res;
+        }
+
+        var access = await accessControlService.AllowAccess(claimsIdentity);
+        if (!access)
+        {
+            res.Errors.Add("banned");
+            return res;
+        }
+
+        res.Data = await jwtService.RefreshAccess(claimsIdentity, rawRefreshToken);
+        return res;
     }
 }

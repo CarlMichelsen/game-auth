@@ -31,19 +31,16 @@ public class JwtService : IJwtService
         };
     }
 
-    public async Task<TokenResponse?> RefreshAccess(ClaimsIdentity claimsIdentity)
+    public async Task<TokenResponse?> RefreshAccess(ClaimsIdentity claimsIdentity, string rawRefreshToken)
     {
-        var accountIdClaim = claimsIdentity.Claims.FirstOrDefault(c => c.Type.Equals("AccountId"));
-        if (accountIdClaim is null) return default;
-
-        var allowed = await accessControlService.AllowAccess(accountIdClaim.Value);
+        var allowed = await accessControlService.AllowAccess(claimsIdentity);
         if (!allowed) return default;
 
         var claims = claimsIdentity.Claims.ToArray();
         return new TokenResponse
         {
             AuthToken = CreateToken(claims, config.AuthSecret, "auth", NewAuthExpireTime()),
-            RefreshToken = CreateToken(claims, config.RefreshSecret, "refresh")
+            RefreshToken = rawRefreshToken
         };
     }
 
