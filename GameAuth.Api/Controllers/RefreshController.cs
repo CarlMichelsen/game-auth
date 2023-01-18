@@ -28,7 +28,7 @@ public class RefreshController : ControllerBase
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var refreshToken = await HttpContext.GetTokenAsync("access_token")
-                ?? throw new NullReferenceException("Token should exsist when identity exsists");
+                ?? throw new NullReferenceException("Token should exsist when this point is reached");
 
             var res = await refreshService.Refresh(identity, refreshToken);
             var accountId = identity?.Claims.FirstOrDefault(a => a.Type.Equals("AccountId"))?.Value ?? "<No AccountId>";
