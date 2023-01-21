@@ -1,15 +1,15 @@
 using GameAuth.Api.Models.Dto.Register;
-using GameAuth.Database.Models.Entities;
+using Entities = GameAuth.Database.Models.Entities;
 
 namespace GameAuth.Api.Mappers;
 
 public static class AccountMapper
 {
-    public static Account MapValidatedRegisterRequestToAccount(RegisterRequest request, string passwordHash, byte[] passwordSalt)
+    public static Entities.Account MapValidatedRegisterRequestToAccount(RegisterRequest request, string passwordHash, byte[] passwordSalt)
     {
         var now = DateTime.UtcNow;
 
-        var email = new Email
+        var email = new Entities.Email
         {
             Value = request.Email,
             Added = now,
@@ -17,7 +17,7 @@ public static class AccountMapper
             LastSetToPrimary = now
         };
 
-        var address = new Address
+        var address = new Entities.Address
         {
             CountryOrRegion = request.Address.CountryOrRegion,
             AddressLine1 = request.Address.AddressLine1,
@@ -28,9 +28,9 @@ public static class AccountMapper
             LastModified = now
         };
 
-        return new Account
+        return new Entities.Account
         {
-            Emails = new List<Email> { email },
+            Emails = new List<Entities.Email> { email },
             EmailVerified = false,
             FullName = request.FullName,
             PhoneNumber = request.PhoneNumber,

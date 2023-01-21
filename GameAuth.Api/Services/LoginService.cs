@@ -3,6 +3,7 @@ using GameAuth.Api.Models.Dto;
 using GameAuth.Api.Models.Dto.Login;
 using GameAuth.Api.Validators;
 using GameAuth.Database.Repository.Interface;
+using GameAuth.Email.Service.Interface;
 
 namespace GameAuth.Api.Services;
 
@@ -12,18 +13,21 @@ public class LoginService : ILoginService
     private readonly IHashingService hashingService;
     private readonly IAccountValidator accountValidator;
     private readonly IJwtService jwtService;
+    private readonly IEmailService emailService;
     private readonly string loginFailedString = "login failed";
 
     public LoginService(
         IAccountRepository accountRepository,
         IHashingService hashingService,
         IAccountValidator accountValidator,
-        IJwtService jwtService)
+        IJwtService jwtService,
+        IEmailService emailService)
     {
         this.accountRepository = accountRepository;
         this.hashingService = hashingService;
         this.accountValidator = accountValidator;
         this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
     public async Task<AuthResponse<TokenResponse>> Login(LoginRequest request)
@@ -52,6 +56,14 @@ public class LoginService : ILoginService
             res.Errors.Add(loginFailedString);
             return res;
         }
+
+        Console.WriteLine("Sending email...");
+        await emailService.SendSupportEmail(
+            request.Email,
+            "Test email",
+            "Email was triggered because someone logged into your account"
+        );
+        Console.WriteLine("Email sent!");
 
         // Placeholder TokenResponse
         res.Data = jwtService.CreateJwtSet(account);

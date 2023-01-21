@@ -1,6 +1,10 @@
+using GameAuth.Email.Configuration;
+
 namespace GameAuth.Api.Configuration;
 
-public class AppConfiguration : IAppConfiguration, IJwtConfiguration
+public class AppConfiguration : IAppConfiguration,
+    IJwtConfiguration,
+    IEmailConfiguration
 {
     private ConfigurationManager? configManager;
 
@@ -16,6 +20,8 @@ public class AppConfiguration : IAppConfiguration, IJwtConfiguration
     public string AuthSecret => ReadConfiguration("Jwt:AuthSecret");
 
     public string RefreshSecret => ReadConfiguration("Jwt:RefreshSecret");
+
+    public string ApiKey => ReadConfiguration("MailGun:ApiKey");
 
     private string ReadConfiguration(string key)
     {

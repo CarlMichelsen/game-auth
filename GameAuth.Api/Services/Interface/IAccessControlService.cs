@@ -4,5 +4,5 @@ namespace GameAuth.Api.Services.Interface;
 
 public interface IAccessControlService
 {
-    public Task<bool> AllowAccess(ClaimsIdentity claimsIdentity);
+    Task<bool> AllowAccess(ClaimsIdentity claimsIdentity);
 }

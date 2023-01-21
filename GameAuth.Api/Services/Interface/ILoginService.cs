@@ -5,5 +5,5 @@ namespace GameAuth.Api.Services.Interface;
 
 public interface ILoginService
 {
-    public Task<AuthResponse<TokenResponse>> Login(LoginRequest request);
+    Task<AuthResponse<TokenResponse>> Login(LoginRequest request);
 }

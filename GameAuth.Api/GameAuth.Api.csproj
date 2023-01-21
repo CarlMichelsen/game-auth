@@ -21,5 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GameAuth.Database\GameAuth.Database.csproj" />
+    <ProjectReference Include="..\GameAuth.Email\GameAuth.Email.csproj" />
   </ItemGroup>
 </Project>

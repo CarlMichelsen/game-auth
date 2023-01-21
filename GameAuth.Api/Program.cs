@@ -1,6 +1,11 @@
 using GameAuth.Database.DataContexts;
-using GameAuth.Database.Repository;
 using GameAuth.Database.Repository.Interface;
+using GameAuth.Database.Repository;
+
+using GameAuth.Email.Configuration;
+using GameAuth.Email.Service.Interface;
+using GameAuth.Email.Service;
+
 using GameAuth.Api.Services;
 using GameAuth.Api.Services.Interface;
 using GameAuth.Api.Validators;
@@ -9,7 +14,9 @@ using GameAuth.Api.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+
 using System.Text;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +28,7 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("GameAuth.Api")));
 
 builder.Services.AddConfigurationSingleton<IJwtConfiguration, AppConfiguration>(builder.Configuration);
+builder.Services.AddConfigurationSingleton<IEmailConfiguration, AppConfiguration>(builder.Configuration);
 
 // Repositories
 builder.Services
@@ -35,10 +43,20 @@ builder.Services
     .AddTransient<IRefreshService, RefreshService>()
     .AddTransient<IHashingService, HashingService>()
     .AddTransient<IAccessControlService, AccessControlService>()
+    .AddTransient<IEmailService, EmailService>()
     .AddTransient<IJwtService, JwtService>();
 
 // Validators
 builder.Services.AddTransient<IAccountValidator, AccountValidator>();
+
+// HttpClientFactories
+builder.Services.AddHttpClient<IEmailService, EmailService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.mailgun.net");
+    var authBytes = Encoding.UTF8.GetBytes($"api:{builder.Configuration["MailGun:ApiKey"]}");
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));
+});
 
 // Authentication
 builder.Services.AddAuthentication(options =>

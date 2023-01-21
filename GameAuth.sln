@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAuth.Api", "GameAuth.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAuth.Database", "GameAuth.Database\GameAuth.Database.csproj", "{81CACA66-B8DB-45B1-BBBF-8D19E6351D87}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameAuth.Email", "GameAuth.Email\GameAuth.Email.csproj", "{3F392B3E-774F-4464-B99E-EC0309B556EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{81CACA66-B8DB-45B1-BBBF-8D19E6351D87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81CACA66-B8DB-45B1-BBBF-8D19E6351D87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81CACA66-B8DB-45B1-BBBF-8D19E6351D87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F392B3E-774F-4464-B99E-EC0309B556EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F392B3E-774F-4464-B99E-EC0309B556EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F392B3E-774F-4464-B99E-EC0309B556EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F392B3E-774F-4464-B99E-EC0309B556EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
