@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using GameAuth.Api.Models.Dto;
 using GameAuth.Api.Models.Dto.Register;
 using GameAuth.Api.Services.Interface;
@@ -12,6 +13,8 @@ public class RegisterController : ControllerBase
 {
     private readonly ILogger<RegisterController> logger;
     private readonly IRegisterService registerService;
+
+    private readonly string internalError = "Internal server error";
 
     public RegisterController(
         ILogger<RegisterController> logger,
@@ -55,7 +58,48 @@ public class RegisterController : ControllerBase
                 e.Source
             );
             Response.StatusCode = 500;
-            return Content("Internal server error");
+            return Content(internalError);
+        }
+    }
+
+    [Authorize]
+    [Route("ResendVerificationEmail")]
+    [HttpPost]
+    public async Task<ActionResult<AuthResponse<bool>>> ResendVerificationEmail()
+    {
+        try
+        {
+            if (HttpContext.User.Identity is not ClaimsIdentity identity)
+                throw new NullReferenceException("No identity supplied when attempting to resend verification email");
+
+            var accountId = identity.Claims.Single(c => c.Type.Equals("AccountId")).Value;
+            var res = await registerService.ResendVerificationEmail(identity);
+            if (res.Ok)
+            {
+                logger.LogInformation(
+                    "verification email was resent for account <{}>",
+                    accountId
+                );
+                return Ok(res);
+            }
+            else
+            {
+                logger.LogInformation(
+                    "<{}> failed verification email resend",
+                    accountId
+                );
+                return BadRequest(res);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(
+                "verification email resending caused an internal server error: \"{}\" [{}]",
+                e.Message,
+                e.Source
+            );
+            Response.StatusCode = 500;
+            return Content(internalError);
         }
     }
 }

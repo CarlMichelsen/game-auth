@@ -19,4 +19,5 @@ public class DataContext : DbContext
     public required DbSet<Address> Address { get; set; }
     public required DbSet<Email> Email { get; set; }
     public required DbSet<Ban> Ban { get; set; }
+    public required DbSet<VerificationEmail> VerificationEmail { get; set; }
 }

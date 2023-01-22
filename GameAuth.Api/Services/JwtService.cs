@@ -69,7 +69,6 @@ public class JwtService : IJwtService
 
     private static Claim[] CreateClaims(Account account)
     {
-        //var primaryEmail = account.Emails.First(e => e.Primary); // There should ALWAYS be a primary email
         if (account.Id == 0) throw new Exception("AccountId 0 can not exist");
         return new[] {
             new Claim("AccountId", account.Id.ToString())

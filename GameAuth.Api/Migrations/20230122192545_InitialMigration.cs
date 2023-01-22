@@ -47,6 +47,21 @@ namespace GameAuth.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "VerificationEmail",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AccountId = table.Column<long>(type: "bigint", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: false),
+                    Sent = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VerificationEmail", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Account",
                 columns: table => new
                 {
@@ -78,8 +93,8 @@ namespace GameAuth.Api.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
-                    IsPrimary = table.Column<bool>(type: "boolean", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: false),
+                    IsPrimary = table.Column<bool>(type: "boolean", nullable: false),
                     Added = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastSetToPrimary = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -113,6 +128,9 @@ namespace GameAuth.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Email");
+
+            migrationBuilder.DropTable(
+                name: "VerificationEmail");
 
             migrationBuilder.DropTable(
                 name: "Account");

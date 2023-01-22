@@ -33,8 +33,8 @@ builder.Services.AddConfigurationSingleton<IEmailConfiguration, AppConfiguration
 // Repositories
 builder.Services
     .AddTransient<IBanRepository, BanRepository>()
-    .AddTransient<IEmailRepository, EmailRepository>()
-    .AddTransient<IAccountRepository, AccountRepository>();
+    .AddTransient<IAccountRepository, AccountRepository>()
+    .AddTransient<IVerificationEmailRepository, VerificationEmailRepository>();
 
 // Services
 builder.Services
@@ -44,7 +44,8 @@ builder.Services
     .AddTransient<IHashingService, HashingService>()
     .AddTransient<IAccessControlService, AccessControlService>()
     .AddTransient<IEmailService, EmailService>()
-    .AddTransient<IJwtService, JwtService>();
+    .AddTransient<IJwtService, JwtService>()
+    .AddTransient<IConfirmationEmailService, ConfirmationEmailService>();
 
 // Validators
 builder.Services.AddTransient<IAccountValidator, AccountValidator>();
@@ -52,7 +53,7 @@ builder.Services.AddTransient<IAccountValidator, AccountValidator>();
 // HttpClientFactories
 builder.Services.AddHttpClient<IEmailService, EmailService>(client =>
 {
-    client.BaseAddress = new Uri("https://api.mailgun.net");
+    client.BaseAddress = new Uri("https://api.eu.mailgun.net");
     var authBytes = Encoding.UTF8.GetBytes($"api:{builder.Configuration["MailGun:ApiKey"]}");
     client.DefaultRequestHeaders.Authorization =
         new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));

@@ -7,8 +7,8 @@ public class Email
     public long Id { get; set; }
     [ForeignKey("Account")]
     public long AccountId { get; set; }
-    public required bool IsPrimary { get; set; }
     public required string Value { get; set; }
+    public required bool IsPrimary { get; set; }
     public required DateTime Added { get; set; }
-    public DateTime? LastSetToPrimary { get; set; }
+    public required DateTime? LastSetToPrimary { get; set; }
 }

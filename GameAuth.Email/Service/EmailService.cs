@@ -16,26 +16,35 @@ public class EmailService : IEmailService
         baseUri = $"v3/{domainName}";
     }
 
-    public async Task SendSupportEmail(string destinationEmail, string subject, string text)
+    public async Task<bool> SendSupportEmail(string destinationEmail, string subject, string text)
     {
         var content = BaseEmailRequestContent(supportName, destinationEmail, subject, text);
         var res = await client.PostAsync($"{baseUri}/messages", content);
-        Console.WriteLine("------------------------------------------------------");
-        Console.WriteLine(res.ReasonPhrase);
-        Console.WriteLine(res.Content.Headers.ToString());
-        Console.WriteLine(res.StatusCode);
-        Console.WriteLine(res.RequestMessage);
-        Console.WriteLine(string.Join('\n', client.DefaultRequestHeaders.Select(kv => $"{kv.Key}: {string.Join(", ", kv.Value)}")));
+        return res.IsSuccessStatusCode;
     }
 
-    private FormUrlEncodedContent BaseEmailRequestContent(string senderName, string destinationEmail, string subject, string text)
+    public async Task<bool> SendVerificationEmail(string destinationEmail, string code)
+    {
+        var lines = new List<string>
+        {
+            "<h1>Verify your email</h1>",
+            $"<p>{code}</p>"
+        };
+
+        var html = string.Join("", lines);
+        var content = BaseEmailRequestContent(supportName, destinationEmail, "Verify your email", html);
+        var res = await client.PostAsync($"{baseUri}/messages", content);
+        return res.IsSuccessStatusCode;
+    }
+
+    private FormUrlEncodedContent BaseEmailRequestContent(string senderName, string destinationEmail, string subject, string html)
     {
         return new FormUrlEncodedContent(new[]
         {
-            new KeyValuePair<string, string>("from", $"Sender {senderName} <{senderName}@{domainName}>"),
+            new KeyValuePair<string, string>("from", $"{senderName} <{senderName}@{domainName}>"),
             new KeyValuePair<string, string>("to", destinationEmail),
             new KeyValuePair<string, string>("subject", subject),
-            new KeyValuePair<string, string>("text", text)
+            new KeyValuePair<string, string>("html", html)
         });
     }
 }

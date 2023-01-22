@@ -14,17 +14,22 @@ public class AccountRepository : IAccountRepository
         this.context = context;
     }
 
+    public async Task<bool> EmailExisits(string email)
+    {
+        return await context.Email
+            .Where(e => e.IsPrimary && e.Value.Equals(email))
+            .AnyAsync();
+    }
+
     public async Task<Account?> GetAccountByEmail(string email)
     {
-        var foundEmail = await context.Email.Where(e => e.IsPrimary && e.Value.Equals(email)).FirstOrDefaultAsync();
-        if (foundEmail is null) return default;
+        var foundEmail = context.Email.Where(e => e.Value.Equals(email)).Single();
+        return await context.Account.FindAsync(foundEmail.AccountId);
+    }
 
-        var account = await context.Account
-            .Where(a => a.Id == foundEmail.AccountId)
-            .Include(a => a.Emails)
-            .FirstOrDefaultAsync();
-        if (account is not null) return account;
-        return default;
+    public async Task<Account?> GetAccountById(long id)
+    {
+        return await context.Account.Include(a => a.Emails).SingleAsync(a => a.Id == id);
     }
 
     public async Task<Account> RegisterAccount(Account account)

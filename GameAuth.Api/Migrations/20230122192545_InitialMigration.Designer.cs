@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameAuth.Api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230117234754_InitialMigration")]
+    [Migration("20230122192545_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -156,6 +156,29 @@ namespace GameAuth.Api.Migrations
                     b.HasIndex("AccountId");
 
                     b.ToTable("Email");
+                });
+
+            modelBuilder.Entity("GameAuth.Database.Models.Entities.VerificationEmail", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Sent")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VerificationEmail");
                 });
 
             modelBuilder.Entity("GameAuth.Database.Models.Entities.Account", b =>

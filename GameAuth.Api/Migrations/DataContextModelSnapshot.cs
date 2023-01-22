@@ -155,6 +155,29 @@ namespace GameAuth.Api.Migrations
                     b.ToTable("Email");
                 });
 
+            modelBuilder.Entity("GameAuth.Database.Models.Entities.VerificationEmail", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Sent")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VerificationEmail");
+                });
+
             modelBuilder.Entity("GameAuth.Database.Models.Entities.Account", b =>
                 {
                     b.HasOne("GameAuth.Database.Models.Entities.Address", "Address")

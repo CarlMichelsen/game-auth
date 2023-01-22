@@ -12,8 +12,8 @@ public static class AccountMapper
         var email = new Entities.Email
         {
             Value = request.Email,
-            Added = now,
             IsPrimary = true,
+            Added = now,
             LastSetToPrimary = now
         };
 
