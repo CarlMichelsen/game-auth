@@ -8,4 +8,6 @@ public interface IRegisterService
 {
     Task<AuthResponse<TokenResponse>> Register(RegisterRequest request);
     Task<AuthResponse<bool>> ResendVerificationEmail(ClaimsIdentity identity);
+
+    Task<AuthResponse<bool>> VerifyEmail(ClaimsIdentity identity, string code);
 }

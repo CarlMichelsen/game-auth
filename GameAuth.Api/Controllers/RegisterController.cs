@@ -18,8 +18,7 @@ public class RegisterController : ControllerBase
 
     public RegisterController(
         ILogger<RegisterController> logger,
-        IRegisterService registerService
-    )
+        IRegisterService registerService)
     {
         this.logger = logger;
         this.registerService = registerService;
@@ -95,6 +94,47 @@ public class RegisterController : ControllerBase
         {
             logger.LogCritical(
                 "verification email resending caused an internal server error: \"{}\" [{}]",
+                e.Message,
+                e.Source
+            );
+            Response.StatusCode = 500;
+            return Content(internalError);
+        }
+    }
+
+    [Authorize]
+    [Route("VerifyEmail/{code}")]
+    [HttpGet]
+    public async Task<ActionResult<AuthResponse<bool>>> VerifyEmail([FromRoute] string code)
+    {
+        try
+        {
+            if (HttpContext.User.Identity is not ClaimsIdentity identity)
+                throw new NullReferenceException("No identity supplied when attempting to verify email");
+
+            var accountId = identity.Claims.Single(c => c.Type.Equals("AccountId")).Value;
+            var res = await registerService.VerifyEmail(identity, code);
+            if (res.Ok)
+            {
+                logger.LogInformation(
+                    "account <{}> was verified",
+                    accountId
+                );
+                return Ok(res);
+            }
+            else
+            {
+                logger.LogInformation(
+                    "account <{}> failed verification",
+                    accountId
+                );
+                return BadRequest(res);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.LogCritical(
+                "email verification attempt caused an internal server error: \"{}\" [{}]",
                 e.Message,
                 e.Source
             );

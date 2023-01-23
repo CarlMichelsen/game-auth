@@ -3,7 +3,6 @@ using GameAuth.Database.Repository.Interface;
 
 using GameAuth.Api.Services.Interface;
 using GameAuth.Email.Service.Interface;
-using Microsoft.EntityFrameworkCore;
 
 namespace GameAuth.Api.Services;
 
@@ -11,13 +10,16 @@ public class ConfirmationEmailService : IConfirmationEmailService
 {
     private readonly IEmailService emailService;
     private readonly IVerificationEmailRepository verificationEmailRepository;
+    private readonly IAccountRepository accountRepository;
 
     public ConfirmationEmailService(
         IEmailService emailService,
-        IVerificationEmailRepository verificationEmailRepository)
+        IVerificationEmailRepository verificationEmailRepository,
+        IAccountRepository accountRepository)
     {
         this.emailService = emailService;
         this.verificationEmailRepository = verificationEmailRepository;
+        this.accountRepository = accountRepository;
     }
 
     public async Task<string> SendVerificationEmail(Account account)
@@ -35,6 +37,14 @@ public class ConfirmationEmailService : IConfirmationEmailService
             throw new Exception("Failed to send verificationEmail and cleaned up after");
         }
         return code;
+    }
+
+    public async Task<bool> VerifyEmail(long accountId, string code)
+    {
+        var verificationEmail = await verificationEmailRepository.GetVerificationEmailByAccountId(accountId);
+        if (verificationEmail is null) return false;
+        if (!verificationEmail.Code.Equals(code)) return false;
+        return await accountRepository.VerifyEmail(accountId);
     }
 
     public Task<string> SendPasswordResetEmail(Account account)

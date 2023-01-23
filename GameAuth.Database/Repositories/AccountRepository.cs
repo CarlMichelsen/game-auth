@@ -38,4 +38,21 @@ public class AccountRepository : IAccountRepository
         await context.SaveChangesAsync();
         return addedAccount.Entity;
     }
+
+    public async Task<bool> VerifyEmail(long id)
+    {
+        try
+        {
+            var account = context.Account.Find(id);
+            if (account is null) return false;
+            account.EmailVerified = true;
+            context.Account.Update(account);
+            await context.SaveChangesAsync();
+            return true;
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+    }
 }

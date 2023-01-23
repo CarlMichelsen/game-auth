@@ -5,6 +5,7 @@ using GameAuth.Api.Mappers;
 using GameAuth.Api.Validators;
 using GameAuth.Database.Repository.Interface;
 using System.Security.Claims;
+using GameAuth.Database.Models.Entities;
 
 namespace GameAuth.Api.Services;
 
@@ -78,6 +79,50 @@ public class RegisterService : IRegisterService
     public async Task<AuthResponse<bool>> ResendVerificationEmail(ClaimsIdentity identity)
     {
         var res = new AuthResponse<bool>();
+        var account = await GetAccountFromClaims(identity);
+
+        if (account.EmailVerified)
+        {
+            res.Errors.Add("account already verified");
+            return res;
+        }
+
+        var code = await confirmationEmailService.SendVerificationEmail(account);
+
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            throw new NullReferenceException("Failed to properly send verification email");
+        }
+
+        res.Data = true;
+        return res;
+    }
+
+    public async Task<AuthResponse<bool>> VerifyEmail(ClaimsIdentity identity, string code)
+    {
+        var res = new AuthResponse<bool>();
+        var account = await GetAccountFromClaims(identity);
+
+        if (account.EmailVerified)
+        {
+            res.Errors.Add("account already verified");
+            return res;
+        }
+
+        var verified = await confirmationEmailService.VerifyEmail(account.Id, code);
+
+        if (!verified)
+        {
+            res.Errors.Add("verification failed");
+            return res;
+        }
+
+        res.Data = verified;
+        return res;
+    }
+
+    private async Task<Account> GetAccountFromClaims(ClaimsIdentity identity)
+    {
         var accountIdClaim = identity.Claims.FirstOrDefault(c => c.Type.Equals("AccountId"));
         var parsed = long.TryParse(accountIdClaim?.Value, out var accountId);
 
@@ -93,14 +138,6 @@ public class RegisterService : IRegisterService
             throw new Exception("Failed to find account based on accountId in claims");
         }
 
-        var code = await confirmationEmailService.SendVerificationEmail(account);
-
-        if (string.IsNullOrWhiteSpace(code))
-        {
-            throw new NullReferenceException("Failed to properly send verification email");
-        }
-
-        res.Data = true;
-        return res;
+        return account;
     }
 }
