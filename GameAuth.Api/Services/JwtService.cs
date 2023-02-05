@@ -24,7 +24,7 @@ public class JwtService : IJwtService
         var claims = CreateClaims(account);
         return new TokenResponse
         {
-            IdentityToken = CreateToken(claims, config.RefreshSecret)
+            IdentityToken = CreateToken(claims, config.IdentitySecret)
         };
     }
 
@@ -42,7 +42,7 @@ public class JwtService : IJwtService
             Subject = new ClaimsIdentity(claims.Append(new Claim("kid", "Identity"))),
             Expires = NewIdentityExpiration(),
             Issuer = config.Issuer,
-            Audience = config.Audience,
+            Audience = config.DefaultAudience,
             SigningCredentials = new SigningCredentials(symmetricKey, SecurityAlgorithms.HmacSha512Signature)
         };
         var tokenHandler = new JwtSecurityTokenHandler();

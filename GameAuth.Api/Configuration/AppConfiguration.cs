@@ -15,13 +15,11 @@ public class AppConfiguration : IAppConfiguration,
 
     public string Issuer => ReadConfiguration("Jwt:Issuer");
 
-    public string Audience => ReadConfiguration("Jwt:Audience");
+    public string DefaultAudience => ReadConfiguration("Jwt:DefaultAudience");
 
-    public string AuthSecret => ReadConfiguration("Jwt:AuthSecret");
+    public string IdentitySecret => ReadConfiguration("Jwt:IdentitySecret");
 
-    public string RefreshSecret => ReadConfiguration("Jwt:RefreshSecret");
-
-    public string ApiKey => ReadConfiguration("MailGun:ApiKey");
+    public string MailApiKey => ReadConfiguration("MailGun:ApiKey");
 
     private string ReadConfiguration(string key)
     {
