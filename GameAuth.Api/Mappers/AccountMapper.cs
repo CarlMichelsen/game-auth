@@ -12,7 +12,6 @@ public static class AccountMapper
         var email = new Entities.Email
         {
             Value = request.Email,
-            IsPrimary = true,
             Added = now,
             LastSetToPrimary = now
         };
@@ -30,8 +29,8 @@ public static class AccountMapper
 
         return new Entities.Account
         {
-            Emails = new List<Entities.Email> { email },
-            EmailVerified = false,
+            Email = email,
+            OtherEmails = new List<Entities.Email>(),
             FullName = request.FullName,
             PhoneNumber = request.PhoneNumber,
             PasswordHash = passwordHash,

@@ -1,6 +1,6 @@
+using GameAuth.Api.Handlers.Interface;
 using GameAuth.Api.Models.Dto;
 using GameAuth.Api.Models.Dto.Login;
-using GameAuth.Api.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,12 +11,12 @@ namespace GameAuth.Api.Controllers;
 public class LoginController : ControllerBase
 {
     private readonly ILogger<LoginController> logger;
-    private readonly ILoginService loginService;
+    private readonly ILoginHandler loginHandler;
 
-    public LoginController(ILogger<LoginController> logger, ILoginService loginService)
+    public LoginController(ILogger<LoginController> logger, ILoginHandler loginHandler)
     {
         this.logger = logger;
-        this.loginService = loginService;
+        this.loginHandler = loginHandler;
     }
 
     [AllowAnonymous]
@@ -25,7 +25,7 @@ public class LoginController : ControllerBase
     {
         try
         {
-            var res = await loginService.Login(request);
+            var res = await loginHandler.Login(request);
             if (res.Ok)
             {
                 logger.LogInformation(

@@ -1,4 +1,4 @@
-using GameAuth.Database.Models.Entities;
+using Entities = GameAuth.Database.Models.Entities;
 using GameAuth.Database.Repository.Interface;
 
 using GameAuth.Api.Services.Interface;
@@ -10,45 +10,55 @@ public class ConfirmationEmailService : IConfirmationEmailService
 {
     private readonly IEmailService emailService;
     private readonly IVerificationEmailRepository verificationEmailRepository;
-    private readonly IAccountRepository accountRepository;
+    private readonly IEmailRepository emailRepository;
 
     public ConfirmationEmailService(
         IEmailService emailService,
         IVerificationEmailRepository verificationEmailRepository,
-        IAccountRepository accountRepository)
+        IEmailRepository emailRepository)
     {
         this.emailService = emailService;
         this.verificationEmailRepository = verificationEmailRepository;
-        this.accountRepository = accountRepository;
+        this.emailRepository = emailRepository;
     }
 
-    public async Task<string> SendVerificationEmail(Account account)
+    public Task<string> SendPasswordResetEmail(Entities.Account account)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<string> SendVerificationEmail(Entities.Account account, Entities.Email email)
     {
         var code = await verificationEmailRepository
-            .UpsertNewVerificationEmail(account.Id);
-        var email = account.Emails.Single(e => e.IsPrimary && e.AccountId.Equals(account.Id));
+            .UpsertNewVerificationEmail(account.Id, email.Id);
+
         var success = await emailService
             .SendVerificationEmail(email.Value, code);
 
         if (!success)
         {
             await verificationEmailRepository
-                .DeleteVerificationEmailByAccountId(account.Id);
+                .DeleteVerificationEmailByEmailId(email.Id);
             throw new Exception("Failed to send verificationEmail and cleaned up after");
         }
         return code;
     }
 
-    public async Task<bool> VerifyEmail(long accountId, string code)
+    public async Task<Entities.Email?> VerifyEmail(long accountId, string code)
     {
-        var verificationEmail = await verificationEmailRepository.GetVerificationEmailByAccountId(accountId);
-        if (verificationEmail is null) return false;
-        if (!verificationEmail.Code.Equals(code)) return false;
-        return await accountRepository.VerifyEmail(accountId);
-    }
+        var verificationEmails = await verificationEmailRepository.GetVerificationEmailsByAccountId(accountId);
 
-    public Task<string> SendPasswordResetEmail(Account account)
-    {
-        throw new NotImplementedException();
+        var matchingVarificationEmails = verificationEmails.Where(e => e.Code.Equals(code));
+        if (matchingVarificationEmails.Count() > 1) throw new InvalidDataException("There are two verification emails with identical code for the same account");
+
+        var verificationEmail = matchingVarificationEmails.FirstOrDefault();
+        if (verificationEmail is null) return default;
+
+        if (!verificationEmail.Code.Equals(code)) return default;
+        var verified = await emailRepository.VerifyEmail(verificationEmail.EmailId);
+
+        return verified
+            ? await emailRepository.GetEmail(verificationEmail.EmailId)
+            : default;
     }
 }

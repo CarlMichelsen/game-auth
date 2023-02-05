@@ -32,29 +32,15 @@ namespace GameAuth.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ban",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AccountId = table.Column<long>(type: "bigint", nullable: false),
-                    Reason = table.Column<string>(type: "text", nullable: false),
-                    BanTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ban", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "VerificationEmail",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AccountId = table.Column<long>(type: "bigint", nullable: false),
+                    EmailId = table.Column<long>(type: "bigint", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: false),
-                    Sent = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    Sent = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,11 +53,11 @@ namespace GameAuth.Api.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    EmailVerified = table.Column<bool>(type: "boolean", nullable: false),
-                    FullName = table.Column<string>(type: "text", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
+                    EmailId = table.Column<long>(type: "bigint", nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     PasswordSalt = table.Column<byte[]>(type: "bytea", nullable: false),
+                    FullName = table.Column<string>(type: "text", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "text", nullable: false),
                     AddressId = table.Column<long>(type: "bigint", nullable: false),
                     LastModified = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -92,11 +78,11 @@ namespace GameAuth.Api.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AccountId = table.Column<long>(type: "bigint", nullable: false),
                     Value = table.Column<string>(type: "text", nullable: false),
-                    IsPrimary = table.Column<bool>(type: "boolean", nullable: false),
+                    Verified = table.Column<bool>(type: "boolean", nullable: false),
                     Added = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastSetToPrimary = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    LastSetToPrimary = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    AccountId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -105,8 +91,7 @@ namespace GameAuth.Api.Migrations
                         name: "FK_Email_Account_AccountId",
                         column: x => x.AccountId,
                         principalTable: "Account",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -115,28 +100,46 @@ namespace GameAuth.Api.Migrations
                 column: "AddressId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Account_EmailId",
+                table: "Account",
+                column: "EmailId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Email_AccountId",
                 table: "Email",
                 column: "AccountId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Account_Email_EmailId",
+                table: "Account",
+                column: "EmailId",
+                principalTable: "Email",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Ban");
+            migrationBuilder.DropForeignKey(
+                name: "FK_Account_Address_AddressId",
+                table: "Account");
 
-            migrationBuilder.DropTable(
-                name: "Email");
+            migrationBuilder.DropForeignKey(
+                name: "FK_Account_Email_EmailId",
+                table: "Account");
 
             migrationBuilder.DropTable(
                 name: "VerificationEmail");
 
             migrationBuilder.DropTable(
-                name: "Account");
+                name: "Address");
 
             migrationBuilder.DropTable(
-                name: "Address");
+                name: "Email");
+
+            migrationBuilder.DropTable(
+                name: "Account");
         }
     }
 }

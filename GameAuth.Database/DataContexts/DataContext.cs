@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using GameAuth.Database.Models.Entities;
+using Entities = GameAuth.Database.Models.Entities;
 
 namespace GameAuth.Database.DataContexts;
 
@@ -15,9 +15,8 @@ public class DataContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    public required DbSet<Account> Account { get; set; }
-    public required DbSet<Address> Address { get; set; }
-    public required DbSet<Email> Email { get; set; }
-    public required DbSet<Ban> Ban { get; set; }
-    public required DbSet<VerificationEmail> VerificationEmail { get; set; }
+    public required DbSet<Entities.Account> Account { get; set; }
+    public required DbSet<Entities.Address> Address { get; set; }
+    public required DbSet<Entities.Email> Email { get; set; }
+    public required DbSet<Entities.VerificationEmail> VerificationEmail { get; set; }
 }

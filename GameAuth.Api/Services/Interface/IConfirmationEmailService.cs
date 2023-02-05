@@ -1,10 +1,10 @@
-using GameAuth.Database.Models.Entities;
+using Entities = GameAuth.Database.Models.Entities;
 
 namespace GameAuth.Api.Services.Interface;
 
 public interface IConfirmationEmailService
 {
-    Task<string> SendVerificationEmail(Account account);
-    Task<bool> VerifyEmail(long accountId, string code);
-    Task<string> SendPasswordResetEmail(Account account);
+    Task<string> SendVerificationEmail(Entities.Account account, Entities.Email email);
+    Task<Entities.Email?> VerifyEmail(long accountId, string code); // returns email that was verified
+    Task<string> SendPasswordResetEmail(Entities.Account account);
 }

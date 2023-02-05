@@ -13,50 +13,34 @@ namespace GameAuth.Api.Services;
 public class JwtService : IJwtService
 {
     private readonly IJwtConfiguration config;
-    private readonly IAccessControlService accessControlService;
 
-    public JwtService(IJwtConfiguration config, IAccessControlService accessControlService)
+    public JwtService(IJwtConfiguration config)
     {
         this.config = config;
-        this.accessControlService = accessControlService;
     }
 
-    public TokenResponse CreateJwtSet(Account account)
+    public TokenResponse CreateIdentityToken(Account account)
     {
         var claims = CreateClaims(account);
         return new TokenResponse
         {
-            AuthToken = CreateToken(claims, config.AuthSecret, "auth", NewAuthExpireTime()),
-            RefreshToken = CreateToken(claims, config.RefreshSecret, "refresh")
+            IdentityToken = CreateToken(claims, config.RefreshSecret)
         };
     }
 
-    public async Task<TokenResponse?> RefreshAccess(ClaimsIdentity claimsIdentity, string rawRefreshToken)
+    private static DateTime NewIdentityExpiration()
     {
-        var allowed = await accessControlService.AllowAccess(claimsIdentity);
-        if (!allowed) return default;
-
-        var claims = claimsIdentity.Claims.ToArray();
-        return new TokenResponse
-        {
-            AuthToken = CreateToken(claims, config.AuthSecret, "auth", NewAuthExpireTime()),
-            RefreshToken = rawRefreshToken
-        };
+        return DateTime.UtcNow.AddDays(14);
     }
 
-    private static DateTime NewAuthExpireTime()
-    {
-        return DateTime.UtcNow.AddMinutes(5);
-    }
-
-    private string CreateToken(Claim[] claims, string secret, string kid, DateTime? expires = null)
+    private string CreateToken(Claim[] claims, string secret)
     {
         var key = Encoding.ASCII.GetBytes(secret);
         var symmetricKey = new SymmetricSecurityKey(key);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims.Append(new Claim("kid", kid))),
-            Expires = expires,
+            Subject = new ClaimsIdentity(claims.Append(new Claim("kid", "Identity"))),
+            Expires = NewIdentityExpiration(),
             Issuer = config.Issuer,
             Audience = config.Audience,
             SigningCredentials = new SigningCredentials(symmetricKey, SecurityAlgorithms.HmacSha512Signature)

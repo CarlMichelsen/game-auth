@@ -17,19 +17,22 @@ public class AccountRepository : IAccountRepository
     public async Task<bool> EmailExisits(string email)
     {
         return await context.Email
-            .Where(e => e.IsPrimary && e.Value.Equals(email))
+            .Where(e => e.Verified && e.Value.Equals(email))
             .AnyAsync();
     }
 
     public async Task<Account?> GetAccountByEmail(string email)
     {
         var foundEmail = context.Email.Where(e => e.Value.Equals(email)).Single();
-        return await context.Account.FindAsync(foundEmail.AccountId);
+        return await context.Account.Where(a => a.Email == foundEmail).SingleAsync();
     }
 
     public async Task<Account?> GetAccountById(long id)
     {
-        return await context.Account.Include(a => a.Emails).SingleAsync(a => a.Id == id);
+        return await context.Account
+            .Include(a => a.OtherEmails)
+            .Include(a => a.Email)
+            .SingleAsync(a => a.Id == id);
     }
 
     public async Task<Account> RegisterAccount(Account account)
@@ -43,9 +46,13 @@ public class AccountRepository : IAccountRepository
     {
         try
         {
-            var account = context.Account.Find(id);
+            var account = await context.Account
+                .Include(a => a.OtherEmails)
+                .Include(a => a.Email)
+                .SingleAsync(a => a.Id == id);
+
             if (account is null) return false;
-            account.EmailVerified = true;
+            account.Email.Verified = true;
             context.Account.Update(account);
             await context.SaveChangesAsync();
             return true;

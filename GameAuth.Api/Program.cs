@@ -8,6 +8,10 @@ using GameAuth.Email.Service;
 
 using GameAuth.Api.Services;
 using GameAuth.Api.Services.Interface;
+
+using GameAuth.Api.Handlers;
+using GameAuth.Api.Handlers.Interface;
+
 using GameAuth.Api.Validators;
 using GameAuth.Api.Configuration;
 
@@ -18,6 +22,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Net.Http.Headers;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -27,28 +32,32 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("GameAuth.Api")));
 
-builder.Services.AddConfigurationSingleton<IJwtConfiguration, AppConfiguration>(builder.Configuration);
-builder.Services.AddConfigurationSingleton<IEmailConfiguration, AppConfiguration>(builder.Configuration);
+builder.Services
+    .AddConfigurationSingleton<IJwtConfiguration, AppConfiguration>(builder.Configuration)
+    .AddConfigurationSingleton<IEmailConfiguration, AppConfiguration>(builder.Configuration);
 
 // Repositories
 builder.Services
-    .AddTransient<IBanRepository, BanRepository>()
+    .AddTransient<IEmailRepository, EmailRepository>()
     .AddTransient<IAccountRepository, AccountRepository>()
     .AddTransient<IVerificationEmailRepository, VerificationEmailRepository>();
 
 // Services
 builder.Services
-    .AddTransient<IRegisterService, RegisterService>()
-    .AddTransient<ILoginService, LoginService>()
-    .AddTransient<IRefreshService, RefreshService>()
     .AddTransient<IHashingService, HashingService>()
-    .AddTransient<IAccessControlService, AccessControlService>()
     .AddTransient<IEmailService, EmailService>()
     .AddTransient<IJwtService, JwtService>()
     .AddTransient<IConfirmationEmailService, ConfirmationEmailService>();
 
 // Validators
-builder.Services.AddTransient<IAccountValidator, AccountValidator>();
+builder.Services
+    .AddTransient<IAccountValidator, AccountValidator>();
+
+// Handlers
+builder.Services
+    .AddTransient<IEmailHandler, EmailHandler>()
+    .AddTransient<IRegisterHandler, RegisterHandler>()
+    .AddTransient<ILoginHandler, LoginHandler>();
 
 // HttpClientFactories
 builder.Services.AddHttpClient<IEmailService, EmailService>(client =>

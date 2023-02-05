@@ -22,10 +22,25 @@ public class VerificationEmailRepository : IVerificationEmailRepository
             .ExecuteDeleteAsync();
     }
 
-    public Task<VerificationEmail?> GetVerificationEmailByAccountId(long accountId)
+    public Task<int> DeleteVerificationEmailByEmailId(long emailId)
     {
         return context.VerificationEmail
+            .Where(e => e.EmailId == emailId)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task<IEnumerable<VerificationEmail>> GetVerificationEmailsByAccountId(long accountId)
+    {
+        var list = await context.VerificationEmail
             .Where(e => e.AccountId == accountId)
+            .ToListAsync();
+        return list;
+    }
+
+    public Task<VerificationEmail?> GetVerificationEmailByEmailId(long emailId)
+    {
+        return context.VerificationEmail
+            .Where(e => e.EmailId == emailId)
             .FirstOrDefaultAsync();
     }
 
@@ -36,12 +51,13 @@ public class VerificationEmailRepository : IVerificationEmailRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<string> UpsertNewVerificationEmail(long accountId, bool omitDeletion = false)
+    public async Task<string> UpsertNewVerificationEmail(long accountId, long emailId, bool omitDeletion = false)
     {
         var code = GenerateVerificationCode();
         var verEmail = new VerificationEmail
         {
             AccountId = accountId,
+            EmailId = emailId,
             Code = code,
             Sent = DateTime.UtcNow
         };

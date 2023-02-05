@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GameAuth.Api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230122192545_InitialMigration")]
+    [Migration("20230205152336_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -36,8 +36,8 @@ namespace GameAuth.Api.Migrations
                     b.Property<long>("AddressId")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("EmailVerified")
-                        .HasColumnType("boolean");
+                    b.Property<long>("EmailId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -61,6 +61,8 @@ namespace GameAuth.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
+
+                    b.HasIndex("EmailId");
 
                     b.ToTable("Account");
                 });
@@ -104,29 +106,6 @@ namespace GameAuth.Api.Migrations
                     b.ToTable("Address");
                 });
 
-            modelBuilder.Entity("GameAuth.Database.Models.Entities.Ban", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("BanTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Ban");
-                });
-
             modelBuilder.Entity("GameAuth.Database.Models.Entities.Email", b =>
                 {
                     b.Property<long>("Id")
@@ -135,14 +114,11 @@ namespace GameAuth.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccountId")
+                    b.Property<long?>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("Added")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsPrimary")
-                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastSetToPrimary")
                         .HasColumnType("timestamp with time zone");
@@ -150,6 +126,9 @@ namespace GameAuth.Api.Migrations
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("Verified")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -173,7 +152,10 @@ namespace GameAuth.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("Sent")
+                    b.Property<long>("EmailId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("Sent")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -189,21 +171,27 @@ namespace GameAuth.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("GameAuth.Database.Models.Entities.Email", "Email")
+                        .WithMany()
+                        .HasForeignKey("EmailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Address");
+
+                    b.Navigation("Email");
                 });
 
             modelBuilder.Entity("GameAuth.Database.Models.Entities.Email", b =>
                 {
                     b.HasOne("GameAuth.Database.Models.Entities.Account", null)
-                        .WithMany("Emails")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("OtherEmails")
+                        .HasForeignKey("AccountId");
                 });
 
             modelBuilder.Entity("GameAuth.Database.Models.Entities.Account", b =>
                 {
-                    b.Navigation("Emails");
+                    b.Navigation("OtherEmails");
                 });
 #pragma warning restore 612, 618
         }

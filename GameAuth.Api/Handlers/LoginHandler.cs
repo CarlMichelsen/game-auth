@@ -3,10 +3,11 @@ using GameAuth.Api.Models.Dto;
 using GameAuth.Api.Models.Dto.Login;
 using GameAuth.Api.Validators;
 using GameAuth.Database.Repository.Interface;
+using GameAuth.Api.Handlers.Interface;
 
-namespace GameAuth.Api.Services;
+namespace GameAuth.Api.Handlers;
 
-public class LoginService : ILoginService
+public class LoginHandler : ILoginHandler
 {
     private readonly IAccountRepository accountRepository;
     private readonly IHashingService hashingService;
@@ -14,7 +15,7 @@ public class LoginService : ILoginService
     private readonly IJwtService jwtService;
     private readonly string loginFailedString = "login failed";
 
-    public LoginService(
+    public LoginHandler(
         IAccountRepository accountRepository,
         IHashingService hashingService,
         IAccountValidator accountValidator,
@@ -54,7 +55,7 @@ public class LoginService : ILoginService
         }
 
         // Placeholder TokenResponse
-        res.Data = jwtService.CreateJwtSet(account);
+        res.Data = jwtService.CreateIdentityToken(account);
         return res;
     }
 }
