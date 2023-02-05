@@ -76,12 +76,12 @@ builder.Services.AddAuthentication(options =>
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(o =>
 {
-    var key = builder.Configuration["Jwt:RefreshSecret"] ?? throw new NullReferenceException("Jwt:RefreshSecret");
+    var key = builder.Configuration["Jwt:IdentitySecret"] ?? throw new NullReferenceException("Jwt:IdentitySecret");
     var byteKey = Encoding.UTF8.GetBytes(key);
     o.TokenValidationParameters = new TokenValidationParameters
     {
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidAudience = builder.Configuration["Jwt:DefaultAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(byteKey),
         ValidateIssuer = true,
         ValidateAudience = true,
